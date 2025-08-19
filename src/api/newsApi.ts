@@ -3,9 +3,6 @@ import ky from "ky";
 const NYT_API_KEY = import.meta.env.VITE_NYT_API_KEY;
 const NYT_BASE_URL = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
 
-const NEWSAPI_KEY = import.meta.env.VITE_NEWSAPI_KEY;
-const NEWSAPI_BASE_URL = "https://newsapi.org/v2/everything";
-
 const THENEWS_API_KEY = import.meta.env.VITE_THENEWS_API_KEY;
 const THNEWS_BASE_URL = "https://api.thenewsapi.com/v1/news/all";
 export const fetchNews = async ({
