@@ -6,7 +6,7 @@ const ImageCustom = ({ caption, url }: { caption?: string; url?: string }) => {
       <img
         src={url || fallback}
         alt={caption || "No image available"}
-        className="w-full h-60 object-cover rounded duration-500 ease-in-out group-hover:scale-110"
+        className="w-full h-60 object-cover bg-white rounded duration-500 ease-in-out group-hover:scale-110"
         loading="lazy"
       />
     </div>
