@@ -28,10 +28,7 @@ export const fetchNews = async ({
       imageUrl: doc.multimedia?.default?.url,
       publishedAt: doc.pub_date,
     })) || [];
-
-  const newsApiUrl = `${NEWSAPI_BASE_URL}?q=${encodeURIComponent(
-    query || "Artificial Intelligence OR AI"
-  )}&page=${page + 1}&pageSize=10&apiKey=${NEWSAPI_KEY}`;
+  const newsApiUrl = `src/api/newscros?q=${encodeURIComponent(query || "Artificial Intelligence OR AI")}&page=${page + 1}`;
   const newsApiRes = await ky.get(newsApiUrl).json<any>();
 
   const newsApiDocs: NewsDefault[] =
