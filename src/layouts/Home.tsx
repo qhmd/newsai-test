@@ -1,4 +1,4 @@
-import { fetchNews } from "../api/newsApi";
+import { fetchNews } from "../../api/newsApi";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import NewsCard from "../components/newsCard";
 import SkeletonGrid from "../components/grid/skeletonGrid";
