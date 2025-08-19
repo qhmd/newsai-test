@@ -3,6 +3,9 @@ import ky from "ky";
 const NYT_API_KEY = import.meta.env.VITE_NYT_API_KEY;
 const NYT_BASE_URL = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
 
+const FINLIGHT_API_KEY = import.meta.env.VITE_FINLIGHT_API_KEY;
+const FINLIGHT_BASE_URL = "https://api.finlight.me/v2/articles";
+
 const THENEWS_API_KEY = import.meta.env.VITE_THENEWS_API_KEY;
 const THNEWS_BASE_URL = "https://api.thenewsapi.com/v1/news/all";
 export const fetchNews = async ({
@@ -11,7 +14,7 @@ export const fetchNews = async ({
 }: {
   page?: number;
   query?: string;
-}): Promise<{ docs: NewsDefault[]; meta: any }> => {
+}): Promise<{ docs: NewsDefault[]}> => {
   const nytQuery = `("Artificial Intelligence" OR "AI") ${query}`;
   const nytUrl = `${NYT_BASE_URL}?q=${encodeURIComponent(
     nytQuery
@@ -25,17 +28,31 @@ export const fetchNews = async ({
       imageUrl: doc.multimedia?.default?.url,
       publishedAt: doc.pub_date,
     })) || [];
-  const newsApiUrl = `api/newscros?q=${encodeURIComponent(query || "Artificial Intelligence OR AI")}&page=${page + 1}`;
-  const newsApiRes = await ky.get(newsApiUrl).json<any>();
 
-  const newsApiDocs: NewsDefault[] =
-    newsApiRes?.articles?.map((article: any, idx: number) => ({
-      id: article.url || `newsapi-${page}-${idx}`,
-      title: article.title,
-      url: article.url,
-      imageUrl: article.urlToImage,
-      publishedAt: article.publishedAt,
-    })) || [];
+
+  const finlightBody = {
+    query: query.trim() ? `(AI OR "artificial intelligence") AND ${query}` : "(AI OR \"artificial intelligence\")",
+    language: "en",
+    pageSize: 10,
+    page: page + 1,
+    includeContent: false
+  };
+
+  const finlightRes = await ky.post(FINLIGHT_BASE_URL, {
+    headers: {
+      "X-API-KEY": FINLIGHT_API_KEY,
+      "Content-Type": "application/json",
+    },
+    json: finlightBody,
+  }).json<any>();
+
+  const finlightDocs: NewsDefault[] = (finlightRes.articles || []).map((article: any, idx: number) => ({
+    id: article.link || `finlight-${page}-${idx}`,
+    title: article.title,
+    url: article.link,
+    imageUrl: article.images?.[1] || null,
+    publishedAt: article.publishDate,
+  }));
 
 
 
@@ -57,17 +74,11 @@ export const fetchNews = async ({
     })) || [];
 
 
-  const mergedDocs: NewsDefault[] = [...nytDocs, ...newsApiDocs, ...newsdataDocs];
+  const mergedDocs: NewsDefault[] = [...nytDocs, ...finlightDocs, ...newsdataDocs];
 
   mergedDocs.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
 
   return {
     docs: mergedDocs,
-    meta: {
-      nyt: nytRes?.response?.meta,
-      newsApi: {
-        totalResults: newsApiRes?.totalResults,
-      },
-    },
   };
 };
